@@ -141,7 +141,13 @@ bool UCTSummaryCard::processRegion(UCTRegionIndex center) {
   // We should never need beyond nearest-neighbor for most
   // objects - eGamma, tau or jet
 
-  uint32_t boostedJetTowers[12][12];
+  std::vector<uint32_t> boostedJetTowers;
+  boostedJetTowers.clear();
+  for(size_t iPhi = 0; iPhi < 12; iPhi++){
+    for(size_t iEta = 0; iEta < 12; iEta++) {
+      boostedJetTowers.push_back(0);
+    }
+  }
 
   UCTGeometryExtended g;
 
@@ -163,9 +169,9 @@ bool UCTSummaryCard::processRegion(UCTRegionIndex center) {
   //get the towers from central
   int etaOffset = 4;
   int phiOffset = 4;
-  for(uint32_t iPhi = 0; iPhi < 4; iPhi++){
-    for(uint32_t iEta = 0; iEta < 4; iEta++) {
-      boostedJetTowers[etaOffset+iEta][phiOffset+iPhi]=cRegion->towers[iEta*4+iPhi]->et();
+  for(size_t iPhi = 0; iPhi < 4; iPhi++){
+    for(size_t iEta = 0; iEta < 4; iEta++) {
+      if(iEta*4+iPhi < cRegion->towers.size()) boostedJetTowers[(etaOffset+iEta)*12+(phiOffset+iPhi)] = cRegion->towers[iEta*4+iPhi]->et();
     }
   }
   // finish getting towers from central
@@ -212,11 +218,9 @@ bool UCTSummaryCard::processRegion(UCTRegionIndex center) {
     int phiOffset = 0;
     for(uint32_t iPhi = 0; iPhi < 4; iPhi++){
       for(uint32_t iEta = 0; iEta < 4; iEta++) {
-	boostedJetTowers[etaOffset+iEta][phiOffset+iPhi]=northRegion->towers[iEta*4+iPhi]->et();
+        if(iEta*4+iPhi < northRegion->towers.size()) boostedJetTowers[(etaOffset+iEta)*12+(phiOffset+iPhi)] = northRegion->towers[iEta*4+iPhi]->et();
       }
     }
-    // finish getting towers from North
-
   }
 
   UCTRegionIndex southIndex = g.getUCTRegionSouth(center);
@@ -242,16 +246,14 @@ bool UCTSummaryCard::processRegion(UCTRegionIndex center) {
       nTauLike++;
     southIsEGammaLike = southRegion->isEGammaLike();
 
-    //get the towers from South
+    //get the towers from south
     int etaOffset = 4;
     int phiOffset = 8;
     for(uint32_t iPhi = 0; iPhi < 4; iPhi++){
       for(uint32_t iEta = 0; iEta < 4; iEta++) {
-	boostedJetTowers[etaOffset+iEta][phiOffset+iPhi]=southRegion->towers[iEta*4+iPhi]->et();
+        if(iEta*4+iPhi < southRegion->towers.size()) boostedJetTowers[(etaOffset+iEta)*12+(phiOffset+iPhi)] = southRegion->towers[iEta*4+iPhi]->et(); 
       }
     }
-    // finish getting towers from South
-
   }
 
   UCTRegionIndex westIndex = g.getUCTRegionWest(center);
@@ -277,16 +279,14 @@ bool UCTSummaryCard::processRegion(UCTRegionIndex center) {
       nTauLike++;
     westIsEGammaLike = westRegion->isEGammaLike();
 
-    //get the towers from West
+    //get the towers from west
     int etaOffset = 8;
     int phiOffset = 4;
     for(uint32_t iPhi = 0; iPhi < 4; iPhi++){
       for(uint32_t iEta = 0; iEta < 4; iEta++) {
-	boostedJetTowers[etaOffset+iEta][phiOffset+iPhi]=westRegion->towers[iEta*4+iPhi]->et();
+        if(iEta*4+iPhi < westRegion->towers.size()) boostedJetTowers[(etaOffset+iEta)*12+(phiOffset+iPhi)] = westRegion->towers[iEta*4+iPhi]->et();
       }
     }
-    // finish getting towers from West
-
   }
 
   UCTRegionIndex eastIndex = g.getUCTRegionEast(center);
@@ -313,16 +313,14 @@ bool UCTSummaryCard::processRegion(UCTRegionIndex center) {
       nTauLike++;
     eastIsEGammaLike = eastRegion->isEGammaLike();
 
-    //get the towers from East
+    //get the towers from east
     int etaOffset = 0;
     int phiOffset = 4;
     for(uint32_t iPhi = 0; iPhi < 4; iPhi++){
       for(uint32_t iEta = 0; iEta < 4; iEta++) {
-	boostedJetTowers[etaOffset+iEta][phiOffset+iPhi]=eastRegion->towers[iEta*4+iPhi]->et();
+        if(iEta*4+iPhi < eastRegion->towers.size()) boostedJetTowers[(etaOffset+iEta)*12+(phiOffset+iPhi)] = eastRegion->towers[iEta*4+iPhi]->et();
       }
     }
-    // finish getting towers from East
-
   }
 
   UCTRegionIndex nwIndex = g.getUCTRegionNW(center);
@@ -345,16 +343,14 @@ bool UCTSummaryCard::processRegion(UCTRegionIndex center) {
     nwET -= nwPU;
     nwHitTower = nwRegion->hitTowerIndex();
 
-    //get the towers from North West
+    //get the towers from north west
     int etaOffset = 8;
     int phiOffset = 0;
     for(uint32_t iPhi = 0; iPhi < 4; iPhi++){
       for(uint32_t iEta = 0; iEta < 4; iEta++) {
-	boostedJetTowers[etaOffset+iEta][phiOffset+iPhi]=nwRegion->towers[iEta*4+iPhi]->et();
+        if(iEta*4+iPhi < nwRegion->towers.size()) boostedJetTowers[(etaOffset+iEta)*12+(phiOffset+iPhi)] = nwRegion->towers[iEta*4+iPhi]->et();
       }
     }
-    // finish getting towers from North West
-
   }
 
   UCTRegionIndex neIndex = g.getUCTRegionNE(center);
@@ -377,15 +373,14 @@ bool UCTSummaryCard::processRegion(UCTRegionIndex center) {
     neET -= nePU;
     neHitTower = neRegion->hitTowerIndex();
 
-    //get the towers from North East
+    //get the towers from north east
     int etaOffset = 0;
     int phiOffset = 0;
     for(uint32_t iPhi = 0; iPhi < 4; iPhi++){
       for(uint32_t iEta = 0; iEta < 4; iEta++) {
-	boostedJetTowers[etaOffset+iEta][phiOffset+iPhi]=neRegion->towers[iEta*4+iPhi]->et();
+        if(iEta*4+iPhi < neRegion->towers.size()) boostedJetTowers[(etaOffset+iEta)*12+(phiOffset+iPhi)] = neRegion->towers[iEta*4+iPhi]->et();
       }
     }
-    // finish getting towers from North East
   }
 
   UCTRegionIndex swIndex = g.getUCTRegionSW(center);
@@ -408,15 +403,14 @@ bool UCTSummaryCard::processRegion(UCTRegionIndex center) {
     swET -= swPU;
     swHitTower = swRegion->hitTowerIndex();
 
-    //get the towers from South West
+    //get the towers from south west
     int etaOffset = 8;
     int phiOffset = 8;
     for(uint32_t iPhi = 0; iPhi < 4; iPhi++){
       for(uint32_t iEta = 0; iEta < 4; iEta++) {
-	boostedJetTowers[etaOffset+iEta][phiOffset+iPhi]=swRegion->towers[iEta*4+iPhi]->et();
+        if(iEta*4+iPhi < swRegion->towers.size()) boostedJetTowers[(etaOffset+iEta)*12+(phiOffset+iPhi)] = swRegion->towers[iEta*4+iPhi]->et();
       }
     }
-    // finish getting towers from South West
   }
 
   UCTRegionIndex seIndex = g.getUCTRegionSE(center);
@@ -438,15 +432,14 @@ bool UCTSummaryCard::processRegion(UCTRegionIndex center) {
     seET -= sePU;
     seHitTower = seRegion->hitTowerIndex();
 
-    //get the towers from South East
+    //get the towers from south east
     int etaOffset = 0;
     int phiOffset = 8;
     for(uint32_t iPhi = 0; iPhi < 4; iPhi++){
       for(uint32_t iEta = 0; iEta < 4; iEta++) {
-	boostedJetTowers[etaOffset+iEta][phiOffset+iPhi]=seRegion->towers[iEta*4+iPhi]->et();
+        if(iEta*4+iPhi < seRegion->towers.size()) boostedJetTowers[(etaOffset+iEta)*12+(phiOffset+iPhi)] = seRegion->towers[iEta*4+iPhi]->et();
       }
     }
-    // finish getting towers from South East
   }
 
   uint32_t et3x3 = centralET + northET + nwET + westET + swET + southET + seET + eastET + neET;
@@ -480,7 +473,7 @@ bool UCTSummaryCard::processRegion(UCTRegionIndex center) {
     bitset<12> phi((string)(nPhi.to_string() + cPhi.to_string() + sPhi.to_string())); 
     boostedJet->setActiveTowerEta(eta);
     boostedJet->setActiveTowerPhi(phi);
-    boostedJet->setBoostedJetTowers(*boostedJetTowers);
+    boostedJet->setBoostedJetTowers(boostedJetTowers);
     boostedJetObjs.push_back(boostedJet);
     /*
     if(jetET > 150) {
@@ -495,10 +488,17 @@ bool UCTSummaryCard::processRegion(UCTRegionIndex center) {
       if(seRegion != nullptr) std::cout << "SE " << *seRegion;
       if(swRegion != nullptr) std::cout << "SW " << *swRegion;
       }*/
+      //std::cout << "(INSIDE UCTSummaryCard) tower et: "<< std::endl;
+      //for(uint32_t iPhi = 0; iPhi < 12; iPhi++){
+      //  for(uint32_t iEta = 0; iEta < 12; iEta++) {
+      //    std::cout <<  boostedJetTowers[iEta*12+iPhi] <<setw(20)<<"";
+      //  } 
+      //}
+      //std::cout<<"\n"<<"eta: "<<eta.to_string()<<"\t"<<"phi: "<<phi.to_string()<<std::endl; 
+    
   }
-    
-  // tau Object - a single region or a 2-region sum, where the neighbor with lower ET is located using matching hit calo towers
-    
+
+  // tau Object - a single region or a 2-region sum, where the neighbor with lower ET is located using matching hit calo towers    
   if(centralRegion && centralIsTauLike && centralET > tauSeed) {
     uint32_t tauET = centralET;
     uint32_t tauPU = centralPU;
